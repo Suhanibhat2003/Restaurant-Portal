@@ -2,24 +2,35 @@ const express = require("express");
 const router = express.Router();
 const MenuItem = require("../models/menuModels");
 
-// Get all menu items
-router.get("/", async (req, res) => {
-  const items = await MenuItem.find();
-  res.json(items);
-});
-
-// Add menu item
 router.post("/", async (req, res) => {
-  const newItem = new MenuItem(req.body);
-  const savedItem = await newItem.save();
-  res.json(savedItem);
+  try {
+    const newItem = new MenuItem(req.body);
+    const savedItem = await newItem.save();
+    res.status(201).json(savedItem);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-// Delete menu item
-router.delete("/:id", async (req, res) => {
-  const deleted = await MenuItem.findByIdAndDelete(req.params.id);
-  if (!deleted) return res.status(404).json({ message: "Item not found" });
-  res.json({ message: "Deleted successfully" });
+
+router.get("/", async (req, res) => {
+  try {
+    const menu = await MenuItem.find().sort({ createdAt: -1 });
+    res.json(menu);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
+
+
+router.delete("/:id", async (req, res) => {
+  try {
+    await MenuItem.findByIdAndDelete(req.params.id);
+    res.json({ message: "Item deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 module.exports = router;
