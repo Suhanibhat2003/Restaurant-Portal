@@ -3,13 +3,20 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const AdminMenu = () => {
+  const [menu, setMenu] = useState([]);
+  const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
     category: "",
     taxPercent: "",
   });
-  const [menu, setMenu] = useState([]);
+  const [editData, setEditData] = useState({
+    name: "",
+    price: "",
+    category: "",
+    taxPercent: "",
+  });
 
   const fetchMenu = async () => {
     await axios
@@ -62,6 +69,38 @@ const AdminMenu = () => {
       .catch((err) => {
         console.error("Error deleting item:", err);
       });
+  };
+
+  const handleEdit = (item) => {
+    setEditId(item._id);
+    setEditData({
+      name: item.name,
+      price: item.price,
+      category: item.category,
+      taxPercent: item.taxPercent || 0,
+    });
+  };
+  const handleEditChange = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    const newForm = { ...editData, [name]: value };
+    setEditData(newForm);
+  };
+  const handleSave = async (id) => {
+    await axios
+      .put(`http://localhost:5000/api/menu/${id}`, {
+        ...editData,
+        price: Number(editData.price),
+        taxPercent: Number(editData.taxPercent),
+      })
+      .then(() => {
+        setEditId(null);
+        fetchMenu();
+      })
+      .catch((err) => console.error("Error updating item:", err));
+  };
+  const handleCancel = () => {
+    setEditId(null);
   };
 
   return (
@@ -125,23 +164,87 @@ const AdminMenu = () => {
               <th>Price</th>
               <th>Tax Percent</th>
               <th>Category</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {menu.map((item) => (
               <tr key={item._id}>
-                <td>{item.name}</td>
-                <td>₹{item.price}</td>
-                <td>{item.taxPercent || 0}%</td>
-                <td>{item.category}</td>
-                <td>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDelete(item._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+                {editId == item._id ? (
+                  <>
+                    <td>
+                      <input
+                        type="text"
+                        name="name"
+                        className="form-control"
+                        value={editData.name}
+                        onChange={handleEditChange}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        name="price"
+                        className="form-control"
+                        value={editData.price}
+                        onChange={handleEditChange}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        name="taxPercent"
+                        className="form-control"
+                        value={editData.taxPercent}
+                        onChange={handleEditChange}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        name="category"
+                        className="form-control"
+                        value={editData.category}
+                        onChange={handleEditChange}
+                      />
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-success me-2"
+                        onClick={() => handleSave(item._id)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={handleCancel}
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td>{item.name}</td>
+                    <td>₹{item.price}</td>
+                    <td>{item.taxPercent || 0}%</td>
+                    <td>{item.category}</td>
+                    <td>
+                      <button
+                        className="btn btn-primary me-2"
+                        onClick={() => handleEdit(item)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDelete(item._id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>

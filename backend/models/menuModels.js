@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const MenuItemSchema = new mongoose.Schema(
   {
+    
     name: { type: String, required: true },
     price: { type: Number, required: true },
     category: { type: String, default: "" },
-    // availability: { type: Boolean, default: true },
     taxPercent: { type: Number, required:true},
   },
   { timestamps: true }
