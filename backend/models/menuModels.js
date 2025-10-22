@@ -6,7 +6,7 @@ const MenuItemSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     category: { type: String, default: "" },
     // availability: { type: Boolean, default: true },
-    tax_percent: { type: Number, default: 0 },
+    taxPercent: { type: Number, required:true},
   },
   { timestamps: true }
 );
