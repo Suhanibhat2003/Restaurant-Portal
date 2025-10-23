@@ -10,12 +10,14 @@ const AdminMenu = () => {
     price: "",
     category: "",
     taxPercent: "",
+    image: null,
   });
   const [editData, setEditData] = useState({
     name: "",
     price: "",
     category: "",
     taxPercent: "",
+    image: null,
   });
 
   const fetchMenu = async () => {
@@ -35,17 +37,23 @@ const AdminMenu = () => {
   const handleChange = (e) => {
     const name = e.target.name;
     const value = e.target.value;
-    const newform = { ...formData, [name]: value };
+    const type = e.target.type;
+    const files = e.target.files;
+    const newform = { ...formData, [name]: type === "file" ? files[0] : value };
     setFormData(newform);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("price", Number(formData.price));
+    data.append("taxPercent", Number(formData.taxPercent));
+    data.append("category", formData.category);
+    if (formData.image) data.append("image", formData.image);
     await axios
-      .post("http://localhost:5000/api/menu", {
-        ...formData,
-        price: Number(formData.price),
-        taxPercent: Number(formData.taxPercent),
+      .post("http://localhost:5000/api/menu", data, {
+        headers: { "Content-Type": "multipart/form-data" },
       })
       .then(() => {
         setFormData({
@@ -53,7 +61,9 @@ const AdminMenu = () => {
           price: "",
           category: "",
           taxPercent: "",
+          image: null,
         });
+        document.getElementById("fileInput").value = ""; //for removing image name after clicking add button
         fetchMenu();
       })
       .catch((err) => {
@@ -78,20 +88,27 @@ const AdminMenu = () => {
       price: item.price,
       category: item.category,
       taxPercent: item.taxPercent || 0,
+      image: item.image || null,
     });
   };
   const handleEditChange = (e) => {
     const name = e.target.name;
     const value = e.target.value;
-    const newForm = { ...editData, [name]: value };
+    const type = e.target.type;
+    const files = e.target.files;
+    const newForm = { ...editData, [name]: type == "file" ? files[0] : value };
     setEditData(newForm);
   };
   const handleSave = async (id) => {
+    const data = new FormData();
+    data.append("name", editData.name);
+    data.append("price", Number(editData.price));
+    data.append("taxPercent", Number(editData.taxPercent));
+    data.append("category", editData.category);
+    if (editData.image instanceof File) data.append("image", editData.image);
     await axios
-      .put(`http://localhost:5000/api/menu/${id}`, {
-        ...editData,
-        price: Number(editData.price),
-        taxPercent: Number(editData.taxPercent),
+      .put(`http://localhost:5000/api/menu/${id}`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
       })
       .then(() => {
         setEditId(null);
@@ -152,6 +169,16 @@ const AdminMenu = () => {
                 onChange={handleChange}
               />
             </div>
+            <div className="col-md-3">
+              <input
+                type="file"
+                id="fileInput"
+                name="image"
+                accept="image/*"
+                className="form-control"
+                onChange={handleChange}
+              />
+            </div>
             <div className="col-md-2">
               <button className="btn btn-success w-100">Add</button>
             </div>
@@ -164,6 +191,7 @@ const AdminMenu = () => {
               <th>Price</th>
               <th>Tax Percent</th>
               <th>Category</th>
+              <th>Image</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -209,6 +237,15 @@ const AdminMenu = () => {
                       />
                     </td>
                     <td>
+                      <input
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        className="form-control"
+                        onChange={handleEditChange}
+                      />
+                    </td>
+                    <td>
                       <button
                         className="btn btn-success me-2"
                         onClick={() => handleSave(item._id)}
@@ -229,6 +266,14 @@ const AdminMenu = () => {
                     <td>₹{item.price}</td>
                     <td>{item.taxPercent || 0}%</td>
                     <td>{item.category}</td>
+                    <td>
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} width="80" height="50" />
+                      ) : (
+                        "No Image"
+                      )}
+                    </td>
+
                     <td>
                       <button
                         className="btn btn-primary me-2"
