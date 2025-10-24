@@ -1,3 +1,3 @@
-cd backend- node server.js
+cd backend= node server.js
 
-cd frontend- npm run dev
+cd frontend= npm run dev -- --host
