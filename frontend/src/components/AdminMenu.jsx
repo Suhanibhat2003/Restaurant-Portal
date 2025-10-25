@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AdminMenu = () => {
   const [menu, setMenu] = useState([]);
@@ -22,7 +23,7 @@ const AdminMenu = () => {
 
   const fetchMenu = async () => {
     await axios
-      .get("http://localhost:5000/api/menu")
+      .get(`${API_URL}/api/menu`)
       .then((res) => {
         setMenu(res.data);
       })
@@ -52,7 +53,7 @@ const AdminMenu = () => {
     data.append("category", formData.category);
     if (formData.image) data.append("image", formData.image);
     await axios
-      .post("http://localhost:5000/api/menu", data, {
+      .post(`${API_URL}/api/menu`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then(() => {
@@ -72,7 +73,7 @@ const AdminMenu = () => {
   };
   const handleDelete = async (id) => {
     await axios
-      .delete(`http://localhost:5000/api/menu/${id}`)
+      .delete(`${API_URL}/api/menu/${id}`)
       .then(() => {
         fetchMenu();
       })
@@ -107,7 +108,7 @@ const AdminMenu = () => {
     data.append("category", editData.category);
     if (editData.image instanceof File) data.append("image", editData.image);
     await axios
-      .put(`http://localhost:5000/api/menu/${id}`, data, {
+      .put(`${API_URL}/api/menu/${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then(() => {

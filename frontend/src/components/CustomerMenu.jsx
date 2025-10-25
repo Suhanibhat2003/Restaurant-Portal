@@ -1,14 +1,16 @@
 import React from "react";
 import axios from "axios";
 import { useState, useEffect } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const CustomerMenu = () => {
   const [menu, setMenu] = useState([]);
 
   const fetchMenu = async () => {
     await axios
-      .get("http://localhost:5000/api/menu")
+      .get(`${API_URL}/api/menu`)
       .then((res) => {
+        console.log(res.data);
         setMenu(res.data);
       })
       .catch((err) => {
